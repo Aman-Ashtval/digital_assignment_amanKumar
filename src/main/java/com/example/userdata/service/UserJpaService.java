@@ -21,22 +21,6 @@ public class UserJpaService implements UserRepository {
     private ManagerJpaRepository managerJpaRepository;
 
     @Override
-    public ArrayList<User> getAllUsers(){
-        List<User> usersList = userJpaRepository.findAll();
-        return new ArrayList<>(usersList);
-    }
-
-    @Override
-    public User getUserById(int userId){
-        try{
-            User user = userJpaRepository.findById(userId).get();
-            return user;
-        }catch(Exception e){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "invalid user Id");
-        }
-    }
-
-    @Override
     public User addUser(User user){
         try{
             // user name validation
@@ -81,4 +65,66 @@ public class UserJpaService implements UserRepository {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "invalid manager Id");
         }
     }
+
+    @Override
+    public ArrayList<User> getAllUsers(){
+        List<User> usersList = userJpaRepository.findAll();
+        return new ArrayList<>(usersList);
+    }
+
+    @Override
+    public ArrayList<User> getUserById(int userId){
+        try{
+            User user = userJpaRepository.findById(userId).get();
+            List<User> users = new ArrayList<>();
+            users.add(user);
+            return new ArrayList<>(users);
+        }catch(Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "invalid user Id");
+        }
+    }
+
+    @Override
+    public ArrayList<User> getUserBymobileNumber(String mobileNumber){
+            User user = userJpaRepository.findByMobileNumber(mobileNumber);
+            if(user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not exists");
+            List<User> users = new ArrayList<>();
+            users.add(user);
+            return new ArrayList<>(users);
+    }
+
+    @Override
+    public ArrayList<User> getUserByManager(Manager manager){
+        try{
+            Manager existManager = managerJpaRepository.findById(manager.getManagerId()).get();
+            List<User> users = userJpaRepository.findByManager(existManager);
+            return new ArrayList<>(users);
+        }catch(Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "wrong manager id");
+        }
+    }
+
+    @Override
+    public void deleteUserByUserId(int userId){
+        try{
+            User user = userJpaRepository.findById(userId).get();
+            userJpaRepository.deleteById(userId);
+        }catch(Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not exists");
+        }
+        throw new ResponseStatusException(HttpStatus.NO_CONTENT, "user deleted successfully");
+    }
+
+    @Override
+    public void deleteUserByMObileNumber(String mobileNumber){
+        try{
+            User user = userJpaRepository.findByMobileNumber(mobileNumber);
+            userJpaRepository.deleteById(user.getUserId());
+        }catch(Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not exists");
+        }
+        throw new ResponseStatusException(HttpStatus.NO_CONTENT, "user deleted successfully");
+    }
+
+
 }
